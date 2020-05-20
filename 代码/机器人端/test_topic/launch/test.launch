@@ -1,0 +1,8 @@
+<launch>
+  <master auto="start"/>
+
+  <!-- Run wpb_home core -->
+
+
+  <node pkg="test_topic" type="send" name="send" output="screen" />
+</launch>

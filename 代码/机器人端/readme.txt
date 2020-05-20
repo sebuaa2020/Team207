@@ -1,0 +1,2 @@
+将本文件夹放在src文件夹中进行编译。
+可通过运行launch中的test_mc.launch在gazebo中初步测试主动控制和障碍检测模块
