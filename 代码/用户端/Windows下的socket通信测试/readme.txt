@@ -1,0 +1,3 @@
+此文件用于测试主机与虚拟机中的ros系统能否建立tcp通信。
+需要将client.cpp中的ip地址改为虚拟机的IP地址，用visual stdio进行编译。
+用test_topic中的test.launch启动ros，在主机启动本程序，可成功建立连接，并进行信息传输。
