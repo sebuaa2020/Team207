@@ -23,4 +23,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, Navga.class);
         startActivity(intent);
     }
+
+    public void Gra(View view){
+        Intent intent = new Intent(this, Grab.class);
+        startActivity(intent);
+    }
 }
