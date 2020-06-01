@@ -8,6 +8,7 @@
 #include <arpa/inet.h> 
 #include <stdlib.h>
 #include <string.h>
+#include "thread_buffer.cpp"
 
 #define STATE_WAIT 0
 #define STATE_CONNECT 1
@@ -15,6 +16,13 @@
 #define STATE_BREAK 3
 
 #define MAX_BUFF 100
+
+static Thread_buffer tb;
+static pthread_t send_thread;
+static pthread_t recv_thread;
+
+void *socket_send(void *arg);
+void *socket_recv(void *arg);
 
 int main(int argc, char** argv)
 {
@@ -26,6 +34,7 @@ int main(int argc, char** argv)
     int i=1;
     int state = STATE_WAIT;
 
+//--------init Socket---------------------------
     int sfd=0, cfd=0, ret=0, count=0;
     socklen_t addrlen;
     struct sockaddr_in saddr, caddr;
@@ -54,8 +63,9 @@ int main(int argc, char** argv)
     }
     addrlen = sizeof(struct sockaddr);
 
-
+//------------Main state control-------------------------------
     char buff[MAX_BUFF]={0};
+    std::string str1,str2;
     while(n.ok())
     {   
         switch(state) {
@@ -66,13 +76,15 @@ int main(int argc, char** argv)
                     break;
                 }
                 printf("accept %s\n", inet_ntoa(caddr.sin_addr));
+                pthread_create(&send_thread, NULL, &socket_send, (void *)cfd);
+                pthread_create(&recv_thread, NULL, &socket_recv, (void *)cfd);
                 state = STATE_CONNECT;
             break;
             case STATE_CONNECT:
-                read(cfd, buff, 10);
-                printf("read: %s\n", buff);
-                scanf("%s", buff);
-                write(cfd, buff, strlen(buff));
+                tb.get_recv(&str1);
+                str2 = "ROS get: " +str1;
+                std::cout<<str2<<std::endl;
+                tb.set_send(str2);
             break;
             case STATE_WORK:
                 scanf("%d", &send);
@@ -88,4 +100,34 @@ int main(int argc, char** argv)
         
     }
     return 0;
+}
+
+void *socket_send(void *arg) {
+    std::cout<<"Socket send thread online"<<std::endl;
+    int cfd = (long) arg;
+    char cbuff[MAX_BUFF];
+    std::string sbuff;
+    while(1) {
+        tb.get_send(&sbuff);
+        int i;
+        for (i=0; i<sbuff.length(); i++) {
+            cbuff[i] = sbuff[i];
+        }
+        cbuff[i] = '\0';
+        write(cfd, cbuff, strlen(cbuff));
+        std::cout << "socket send: " << sbuff << std::endl;
+    }
+}
+
+void *socket_recv(void *arg) {
+    std::cout<<"Socket recv thread online"<<std::endl;
+    int cfd = (long) arg;
+    char cbuff[MAX_BUFF];
+    std::string sbuff;
+    while(1) {
+        read(cfd, cbuff, 10);
+        sbuff = std::string(cbuff);
+        tb.set_recv(sbuff);
+        std::cout << "socket recv: " << sbuff << std::endl;
+    }
 }

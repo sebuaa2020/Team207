@@ -244,3 +244,11 @@ add_dependencies(test_MC ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_T
 target_link_libraries(test_MC
   ${catkin_LIBRARIES}
 )
+
+add_library(thread_buffer
+  src/thread_buffer.cpp
+)
+add_dependencies(thread_buffer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(thread_buffer
+  ${catkin_LIBRARIES}
+)
