@@ -70,6 +70,7 @@ int main(int argc, char** argv)
     {   
         switch(state) {
             case STATE_WAIT:
+                printf("waiting for connection\n");
                 cfd = accept(sfd, (struct sockaddr*)(&caddr), &addrlen);
                 if(cfd == -1) {
                     printf("Failed to accept\n");
@@ -105,6 +106,7 @@ int main(int argc, char** argv)
 void *socket_send(void *arg) {
     std::cout<<"Socket send thread online"<<std::endl;
     int cfd = (long) arg;
+    int r;
     char cbuff[MAX_BUFF];
     std::string sbuff;
     while(1) {
@@ -114,7 +116,11 @@ void *socket_send(void *arg) {
             cbuff[i] = sbuff[i];
         }
         cbuff[i] = '\0';
-        write(cfd, cbuff, strlen(cbuff));
+        r = send(cfd, cbuff, strlen(cbuff), 0);
+        if (r == 0 || r == -1) {
+            printf("socket_send return %d\n",r);
+            break;
+        }
         std::cout << "socket send: " << sbuff << std::endl;
     }
 }
@@ -122,10 +128,15 @@ void *socket_send(void *arg) {
 void *socket_recv(void *arg) {
     std::cout<<"Socket recv thread online"<<std::endl;
     int cfd = (long) arg;
+    int r;
     char cbuff[MAX_BUFF];
     std::string sbuff;
     while(1) {
-        read(cfd, cbuff, 10);
+        r = recv(cfd, cbuff, MAX_BUFF, 0);
+        if (r == 0 || r == -1) {
+            printf("socket_recv return %d\n",r);
+            break;
+        }
         sbuff = std::string(cbuff);
         tb.set_recv(sbuff);
         std::cout << "socket recv: " << sbuff << std::endl;
