@@ -45,6 +45,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate messages in the 'msg' folder
 add_message_files(FILES
+  Grab_msg.msg
+  Nav_msg.msg
   OD_msg.msg
   MC_msg.msg
   test_msg.msg
@@ -250,5 +252,13 @@ add_library(thread_buffer
 )
 add_dependencies(thread_buffer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(thread_buffer
+  ${catkin_LIBRARIES}
+)
+
+add_library(cmd_handler
+  src/cmd_handler.cpp
+)
+add_dependencies(cmd_handler ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(cmd_handler
   ${catkin_LIBRARIES}
 )

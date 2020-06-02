@@ -19,6 +19,12 @@ class Thread_buffer {
         }
 
         ~Thread_buffer() {
+            while (!recv_buffer.empty()) {
+                recv_buffer.pop();
+            }
+            while (!send_buffer.empty()) {
+                send_buffer.pop();
+            }
         }
 
         void set_send(std::string msg) {
@@ -49,6 +55,17 @@ class Thread_buffer {
                 *msg = recv_buffer.front();
                 recv_buffer.pop();
             pthread_mutex_unlock(&recv_lock);
+        }
+
+        void clear_buff() {
+            while (!recv_buffer.empty()) {
+                recv_buffer.pop();
+            }
+            while (!send_buffer.empty()) {
+                send_buffer.pop();
+            }
+            sem_init(&send_sem, 0, 0);
+            sem_init(&recv_sem, 0, 0);
         }
 
 };
