@@ -41,11 +41,10 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
                 // Toast 显示需要出现在一个线程的消息队列中
                 Looper.prepare();
                 Toast.makeText(mContext, "程序出错:" + msg.toString(), Toast.LENGTH_LONG).show();
-                //将异常记录到本地的数据库或者文件中.或者直接提交到后台服务器
                 Looper.loop();
+                //将异常记录到本地的数据库或者文件中.或者直接提交到后台服务器
             }
-
-            ;
         }.start();
     }
 }
+

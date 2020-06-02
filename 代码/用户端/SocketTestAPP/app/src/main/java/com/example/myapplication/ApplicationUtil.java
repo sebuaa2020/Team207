@@ -53,6 +53,14 @@ public class ApplicationUtil extends Application {
                             } catch (IOException e) {
                                 CrashHandler.getInstance().uncaughtException(this, e);
                             }
+                            final String s = msg;
+                            new Thread() {
+                                public void run() {
+                                    Looper.prepare();
+                                    Toast.makeText(getApplicationContext(), "socket recieve： " + s, Toast.LENGTH_LONG).show();
+                                    Looper.loop();
+                                }
+                            }.start();
                             if (msg != null) {
                                 msgBuffer.setrecv(msg);
                                 msg = null;
@@ -64,14 +72,17 @@ public class ApplicationUtil extends Application {
                 while(client.isConnected()) {
                     String msg = null;
                     msg = msgBuffer.getSend();
+                    final String s = msg;
+                    new Thread() {
+                        public void run() {
+                            Looper.prepare();
+                            Toast.makeText(getApplicationContext(), "socket send： "+s, Toast.LENGTH_LONG).show();
+                            Looper.loop();
+                        }
+                    }.start();
                     if (msg != null) {
-                        Looper.prepare();
-                        Toast.makeText(getApplicationContext(),"Try send", Toast.LENGTH_LONG).show();
-
                         sender.println(msg);
                         sender.flush();
-                        Toast.makeText(getApplicationContext(),"send end", Toast.LENGTH_LONG).show();
-                        Looper.loop();
                         msg = null;
                     }
                 }
@@ -103,6 +114,7 @@ public class ApplicationUtil extends Application {
 
     public String receive() throws IOException {
         return msgBuffer.getrecv();
+
     }
 
     public boolean isConnected() {

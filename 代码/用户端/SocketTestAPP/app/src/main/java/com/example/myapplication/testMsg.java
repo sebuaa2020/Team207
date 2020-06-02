@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -25,11 +26,6 @@ public class testMsg extends AppCompatActivity {
                 }
                 TextView board = (TextView) findViewById(R.id.msgToReceive);
                 board.setText(buffer);
-                try {
-                    sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
         }
     }
@@ -47,8 +43,7 @@ public class testMsg extends AppCompatActivity {
     }
 
     public void sendMsg(View v) throws IOException {
-        EditText msg = (EditText) findViewById(R.id.msgToSend);
-        Toast.makeText(getApplicationContext(),"send:" + msg.getText().toString(), Toast.LENGTH_LONG).show();
+        final EditText msg = (EditText) findViewById(R.id.msgToSend);
         ((ApplicationUtil)getApplication()).send(msg.getText().toString());
     }
 
