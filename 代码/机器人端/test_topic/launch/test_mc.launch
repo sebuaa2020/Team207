@@ -12,9 +12,10 @@
   <!-- Spawn a robot into Gazebo -->
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-file $(find wpr_simulation)/urdf/wpb_home.gazebo -urdf -model wpb_home" />
 
-
-  <node pkg="test_topic" type="test_MC" name="test_MC" output="screen"/>
+  
+  <node pkg="test_topic" type="send" name="main_control" output="screen"/>
   <node pkg="test_topic" type="maunal_control" name="maunal_control" output="screen"/>
+  <!--
   <node pkg="test_topic" type="obstacle_detect" name="obstacle_detect" output="screen"/>
-
+  -->
 </launch>

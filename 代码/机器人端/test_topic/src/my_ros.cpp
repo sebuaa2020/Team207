@@ -4,6 +4,7 @@
 #include <test_topic/MC_msg.h>
 #include <test_topic/Nav_msg.h>
 #include <test_topic/Grab_msg.h>
+#include <test_topic/Ret_msg.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -29,14 +30,16 @@ static bool isconnect = false;
 
 void *socket_send(void *arg);
 void *socket_recv(void *arg);
+int rethandler(const test_topic::Ret_msg::ConstPtr& msg);
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "test_sender");
+    ros::init(argc, argv, "my_ros");
     ros::NodeHandle n;
     ros::Publisher mc_pub = n.advertise<test_topic::MC_msg>("/MC_msg", 10);
     ros::Publisher nav_pub = n.advertise<test_topic::Nav_msg>("/Nav_msg", 10);
     ros::Publisher grab_pub = n.advertise<test_topic::Grab_msg>("/Grab_msg", 10);
+    ros::Subscriber ret_sub = n.subscribe<test_topic::Ret_msg>("/return_msg", 10, &rethandler);
     int send;
     int i=1;
     int state = STATE_WAIT;
@@ -123,12 +126,13 @@ int main(int argc, char** argv)
                 }
                 str_to_cmd(strbuff, &cmdbuff);
                 if (cmdbuff.type == 1) {
-                    if (std::strcmp(password, cmdbuff.content)) {
-                        printf("Successful login");
+                    printf("pass:%s, input:%s\n",password,cmdbuff.content);
+                    if (std::strcmp(password, cmdbuff.content) == 0) {
+                        printf("Successful login\n");
                         tb.set_send("0 1");
                         state = STATE_WORK;
                     } else {
-                        printf("Wrong Password");
+                        printf("Wrong Password\n");
                         tb.set_send("0 0");
                     }
                 }
@@ -235,4 +239,12 @@ void *socket_recv(void *arg) {
         tb.set_recv(sbuff);
         std::cout << "socket recv: " << sbuff << std::endl;
     }
+}
+
+int rethandler(const test_topic::Ret_msg::ConstPtr& msg) {
+    char buff[20];
+    std::sprintf(buff, "0 %d %d\n", msg->publisher, msg->type);
+    std::string str(buff);
+    tb.set_send(str);
+    return 0;
 }

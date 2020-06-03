@@ -33,20 +33,24 @@ typedef struct cmd_grab {
 
 void str_to_cmd(std::string str, Cmd *buff) {
     memset(buff, 0, sizeof(Cmd));
+    std::cout << "cmd handler: string:"<<str<<",";
     std::stringstream ss;
     ss << str;
     int type;
     char c;
-    ss >> type >> c;
+    ss >> type ;
     buff->type = type;
+    std::cout << " type:"<<type<<",";
     switch (type) {
         case 1://-----Login cmd-----
             ss >> buff->content;
+            std::cout << " pass:"<<buff->content<<",";
         break;
         case 2://-----Manual control cmd-----
             Cmd_mc *mc;
             mc = (Cmd_mc *)&(buff->content);
             ss >> mc->type;
+            std::cout << " type2:"<<mc->type<<",";
         break;
         case 3://-----Navigation cmd-----
             Cmd_nav *nav;

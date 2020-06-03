@@ -30,6 +30,7 @@ class Thread_buffer {
         void set_send(std::string msg) {
             pthread_mutex_lock(&send_lock);
                 send_buffer.push(msg);
+                std::cout<<"TB: push send: "<<msg<<std::endl;
                 sem_post(&send_sem);
             pthread_mutex_unlock(&send_lock);
         }
@@ -38,6 +39,7 @@ class Thread_buffer {
             sem_wait(&send_sem);
             pthread_mutex_lock(&send_lock);
                 *msg = send_buffer.front();
+                std::cout<<"TB: pop send: "<<*msg<<std::endl;
                 send_buffer.pop();
             pthread_mutex_unlock(&send_lock);
         }

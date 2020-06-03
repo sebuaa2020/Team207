@@ -8,6 +8,11 @@
 static const float alert_dist = 0.4;
 static ros::Publisher OD_pub;
 
+static bool ob_front = false;
+static bool ob_back = false;
+static bool ob_left = false;
+static bool ob_right = false;
+
 void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 {
     int nNum = scan->ranges.size();
@@ -56,8 +61,14 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
         newmsg.right = true;
     else 
         newmsg.right = false;
-    OD_pub.publish(newmsg);
     
+    if (newmsg.front != ob_front || newmsg.back != ob_back || newmsg.left != ob_left || newmsg.right != ob_right) {
+        ob_front = newmsg.front;
+        ob_back = newmsg.back;
+        ob_left = newmsg.left;
+        ob_right = newmsg.right;
+        OD_pub.publish(newmsg);
+    }
 }
 
 int main(int argc, char** argv)

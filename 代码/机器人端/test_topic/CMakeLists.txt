@@ -45,6 +45,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate messages in the 'msg' folder
 add_message_files(FILES
+  Ret_msg.msg
   Grab_msg.msg
   Nav_msg.msg
   OD_msg.msg
@@ -207,27 +208,19 @@ include_directories(
 # catkin_add_nosetests(test)
 
 
-add_executable(send
-  src/send.cpp
+add_executable(my_ros
+  src/my_ros.cpp
 )
-add_dependencies(send ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(send
+add_dependencies(my_ros ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(my_ros
   ${catkin_LIBRARIES}
 )
 
-add_executable(receive
-  src/receive.cpp
+add_executable(manual_control
+  src/manual_control.cpp
 )
-add_dependencies(receive ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(receive
-  ${catkin_LIBRARIES}
-)
-
-add_executable(maunal_control
-  src/maunal_control.cpp
-)
-add_dependencies(maunal_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(maunal_control
+add_dependencies(manual_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(manual_control
   ${catkin_LIBRARIES}
 )
 
