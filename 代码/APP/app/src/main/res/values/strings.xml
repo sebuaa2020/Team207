@@ -1,5 +1,3 @@
 <resources>
     <string name="app_name">ROSControl</string>
-    <string name="select_type">Select a type</string>
-    <string name="select_val">Select a value</string>
 </resources>
