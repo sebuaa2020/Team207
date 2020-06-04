@@ -1,0 +1,1 @@
+keytool -genkey -alias testalias -keypass 123456 -keyalg RSA -keysize 2048 -validity 36500 -keystore F:\Android\ROS\apk\test.keystore -storepass 123456 

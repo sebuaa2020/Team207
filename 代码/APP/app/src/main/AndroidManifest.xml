@@ -11,7 +11,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".Grab"
+        <activity
+            android:name=".Grab"
             android:parentActivityName=".Menu">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -38,7 +39,6 @@
                 android:name=".Menu"
                 android:value=".MainActivity" />
         </activity>
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,0 +1,1 @@
+apk文件放在./app/release文件夹下，名称为app-release.apk文件，在手机上安装即可使用。

@@ -8,15 +8,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.example.roscontrol.Menu;
-
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 public class MainActivity extends AppCompatActivity {
 
