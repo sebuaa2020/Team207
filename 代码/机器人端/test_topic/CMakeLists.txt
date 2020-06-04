@@ -8,7 +8,8 @@ project(test_topic)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  message_generation roscpp std_msgs)
+  message_generation roscpp std_msgs
+  move_base_msgs actionlib)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -253,5 +254,21 @@ add_library(cmd_handler
 )
 add_dependencies(cmd_handler ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(cmd_handler
+  ${catkin_LIBRARIES}
+)
+
+add_executable(navigation_control
+  src/navigation_control.cpp
+)
+add_dependencies(navigation_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(navigation_control
+  ${catkin_LIBRARIES}
+)
+
+add_executable(test_NAV
+  src/test_NAV.cpp
+)
+add_dependencies(test_NAV ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_NAV
   ${catkin_LIBRARIES}
 )
