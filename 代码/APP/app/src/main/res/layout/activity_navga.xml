@@ -41,13 +41,10 @@
         android:id="@+id/startNav"
         android:layout_width="100dp"
         android:layout_height="41dp"
-        android:layout_marginStart="141dp"
-        android:layout_marginTop="36dp"
-        android:layout_marginEnd="141dp"
+        android:layout_marginStart="70dp"
+        android:layout_marginTop="40dp"
         android:onClick="sendMsg"
         android:text="开始导航"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.482"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/direction" />
 
@@ -105,11 +102,11 @@
         android:id="@+id/endNagv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
+        android:layout_marginTop="33dp"
+        android:layout_marginEnd="57dp"
         android:onClick="end"
         android:text="终止导航"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/startNav" />
+        app:layout_constraintTop_toBottomOf="@+id/direction" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
