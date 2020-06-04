@@ -24,28 +24,49 @@
 #define MAX_BUFF 100
 
 static Thread_buffer tb;
+static pthread_t state_thread;
 static pthread_t send_thread;
 static pthread_t recv_thread;
+static ros::Publisher mc_pub;
+static ros::Publisher nav_pub;
+static ros::Publisher grab_pub;
+static int sfd = 0;
+static int cfd = 0;
 static bool isconnect = false;
+static bool isexit = false;
 
+void *state_control(void *arg);
 void *socket_send(void *arg);
 void *socket_recv(void *arg);
-int rethandler(const test_topic::Ret_msg::ConstPtr& msg);
+void rethandler(const test_topic::Ret_msg::ConstPtr& msg);
 
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "my_ros");
     ros::NodeHandle n;
-    ros::Publisher mc_pub = n.advertise<test_topic::MC_msg>("/MC_msg", 10);
-    ros::Publisher nav_pub = n.advertise<test_topic::Nav_msg>("/Nav_msg", 10);
-    ros::Publisher grab_pub = n.advertise<test_topic::Grab_msg>("/Grab_msg", 10);
+    mc_pub = n.advertise<test_topic::MC_msg>("/MC_msg", 10);
+    nav_pub = n.advertise<test_topic::Nav_msg>("/Nav_msg", 10);
+    grab_pub = n.advertise<test_topic::Grab_msg>("/Grab_msg", 10);
     ros::Subscriber ret_sub = n.subscribe<test_topic::Ret_msg>("/return_msg", 10, &rethandler);
-    int send;
-    int i=1;
-    int state = STATE_WAIT;
+    
+    pthread_create(&state_thread, NULL, &state_control, NULL);
+    while(!isexit && ros::ok() ) {
+        ros::spinOnce();
+    }
+    isexit = true;
+    pthread_cancel(state_thread);
+    pthread_join(state_thread, NULL);
+    printf("node exit\n");
+    close(cfd);
+    close(sfd);
+    return 0;
+}
 
+void *state_control(void *arg) {
+    int state = STATE_WAIT;
+    bool iscancel = false;
 //--------init Socket---------------------------
-    int sfd=0, cfd=0, ret=0, count=0;
+    int ret=0, count=0;
     socklen_t addrlen;
     struct sockaddr_in saddr, caddr;
     memset(&saddr, 0, sizeof(struct sockaddr_in));
@@ -53,7 +74,8 @@ int main(int argc, char** argv)
     sfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sfd == -1) {
         printf("Failed to start socket\n");
-        return -1;
+        isexit = true;
+        return NULL;
     }
     int opt = 1;
     setsockopt(sfd,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof( opt ));
@@ -64,12 +86,14 @@ int main(int argc, char** argv)
     ret = bind(sfd, (struct sockaddr*)(&saddr), sizeof(struct sockaddr));
     if(ret == -1) {
         printf("Failed to bind socket\n");
-        return -1;
+        isexit = true;
+        return NULL;
     }
     ret = listen(sfd, 10);
     if(ret == -1) {
         printf("Failed to listen port\n");
-        return -1;
+        isexit = true;
+        return NULL;
     }
     addrlen = sizeof(struct sockaddr);
 //-----------Load login password-------------------------------
@@ -81,7 +105,8 @@ int main(int argc, char** argv)
         pass = fopen("password.txt", "w");
         if (pass == NULL) {
             printf("Failed to init password\n");
-            return -1;
+            isexit = true;
+            return NULL;
         }
         fprintf(pass, "admin");
         fclose(pass);
@@ -89,7 +114,8 @@ int main(int argc, char** argv)
         pass = fopen("password.txt", "r");
         if (pass == NULL) {
             printf("Failed to reopen password\n");
-            return -1;
+            isexit = true;
+            return NULL;
         }
     }
     char password[20];
@@ -100,8 +126,11 @@ int main(int argc, char** argv)
     char charbuff[MAX_BUFF]={0};
     Cmd cmdbuff;
     std::string strbuff,str2;
-    while(n.ok())
+    while(!(isexit && state == STATE_WAIT))
     {   
+        if (isexit) {
+            state == STATE_BREAK;
+        }
         switch(state) {
             //-----State 1: Wating for connection--------------
             case STATE_WAIT:
@@ -109,6 +138,7 @@ int main(int argc, char** argv)
                 cfd = accept(sfd, (struct sockaddr*)(&caddr), &addrlen);
                 if(cfd == -1) {
                     printf("Failed to accept\n");
+                    isexit = true;
                     break;
                 }
                 printf("accept %s\n", inet_ntoa(caddr.sin_addr));
@@ -129,11 +159,11 @@ int main(int argc, char** argv)
                     printf("pass:%s, input:%s\n",password,cmdbuff.content);
                     if (std::strcmp(password, cmdbuff.content) == 0) {
                         printf("Successful login\n");
-                        tb.set_send("0 1");
+                        tb.set_send("0 0 1\n");
                         state = STATE_WORK;
                     } else {
                         printf("Wrong Password\n");
-                        tb.set_send("0 0");
+                        tb.set_send("0 0 0\n");
                     }
                 }
             break;
@@ -152,6 +182,7 @@ int main(int argc, char** argv)
                         mc = (Cmd_mc *)&(cmdbuff.content);
                         mcmsg.type = mc->type;
                         mc_pub.publish(mcmsg);
+                        printf("Send cmd to MC\n");
                     }
                     break;
                     case 3: {
@@ -161,6 +192,7 @@ int main(int argc, char** argv)
                         navmsg.pos_x = nav->pos_x;
                         navmsg.pos_y = nav->pos_y;
                         navmsg.agl_z = nav->agl_z;
+                        printf("Send cmd to NAV\n");
                         nav_pub.publish(navmsg);
                     }
                     break;
@@ -171,6 +203,7 @@ int main(int argc, char** argv)
                         gmsg.fea_color = grab->fea_color;
                         gmsg.fea_size = grab->fea_size;
                         gmsg.fea_pos = grab->fea_pos;
+                        grab_pub.publish(gmsg);
                     }
                     break;
                     case 5:
@@ -178,6 +211,7 @@ int main(int argc, char** argv)
                     break;
                 }
             break;
+            //-----State 4: End connection, free resource and clean the buffer---
             case STATE_BREAK:
                 isconnect = false;
                 pthread_cancel(send_thread);
@@ -185,25 +219,22 @@ int main(int argc, char** argv)
                 pthread_join(send_thread, NULL);
                 pthread_join(recv_thread, NULL);
                 tb.clear_buff();
+                close (cfd);
                 state = STATE_WAIT;
             break;
 
         }
-        ros::spinOnce();
     }
-    printf("node exit\n");
-    close (cfd);
     close (sfd);
-    return 0;
 }
 
 void *socket_send(void *arg) {
-    std::cout<<"Socket send thread online"<<std::endl;
+    std::cout<<"Socket send thread online\n";
     int cfd = (long) arg;
     int r;
     char cbuff[MAX_BUFF];
     std::string sbuff;
-    while(1) {
+    while(!isexit && isconnect) {
         tb.get_send(&sbuff);
         int i;
         for (i=0; i<sbuff.length(); i++) {
@@ -222,12 +253,12 @@ void *socket_send(void *arg) {
 }
 
 void *socket_recv(void *arg) {
-    std::cout<<"Socket recv thread online"<<std::endl;
+    std::cout<<"Socket recv thread online\n";
     int cfd = (long) arg;
     int r;
     char cbuff[MAX_BUFF];
     std::string sbuff;
-    while(1) {
+    while(!isexit && isconnect) {
         r = recv(cfd, cbuff, MAX_BUFF, 0);
         if (r == 0 || r == -1) {
             printf("socket_recv return %d\n",r);
@@ -241,10 +272,11 @@ void *socket_recv(void *arg) {
     }
 }
 
-int rethandler(const test_topic::Ret_msg::ConstPtr& msg) {
-    char buff[20];
-    std::sprintf(buff, "0 %d %d\n", msg->publisher, msg->type);
-    std::string str(buff);
-    tb.set_send(str);
-    return 0;
+void rethandler(const test_topic::Ret_msg::ConstPtr& msg) {
+    if (isconnect) {
+        char buff[20];
+        std::sprintf(buff, "0 %d %d\n", msg->publisher, msg->type);
+        std::string str(buff);
+        tb.set_send(str);
+    }
 }

@@ -2,6 +2,7 @@
 #include <c++/5/sstream>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 typedef struct cmd {
     long type;
@@ -36,31 +37,32 @@ void str_to_cmd(std::string str, Cmd *buff) {
     std::cout << "cmd handler: string:"<<str<<",";
     std::stringstream ss;
     ss << str;
-    int type;
+    long type;
     char c;
     ss >> type ;
     buff->type = type;
-    std::cout << " type:"<<type<<",";
+    printf("type:%ld, ",type);
     switch (type) {
         case 1://-----Login cmd-----
             ss >> buff->content;
-            std::cout << " pass:"<<buff->content<<",";
+            printf("pass:%s\n", buff->content);
         break;
         case 2://-----Manual control cmd-----
             Cmd_mc *mc;
             mc = (Cmd_mc *)&(buff->content);
             ss >> mc->type;
-            std::cout << " type2:"<<mc->type<<",";
+            printf("type2:%ld\n", mc->type);
         break;
         case 3://-----Navigation cmd-----
             Cmd_nav *nav;
             nav = (Cmd_nav *)&(buff->content);
-            ss >> nav->pos_x >> c >> nav->pos_y >> c >> nav->agl_z;
+            ss >> nav->pos_x >> nav->pos_y  >> nav->agl_z;
+            printf("args:%f, %f, %f\n", nav->pos_x, nav->pos_y, nav->agl_z);
         break;
         case 4://-----Grab cmd-----
             Cmd_grab *grab;
             grab = (Cmd_grab *)&(buff->content);
-            ss >> grab->fea_color >> c >> grab->fea_size >> c >> grab->fea_pos;
+            ss >> grab->fea_color  >> grab->fea_size >> grab->fea_pos;
         break;
         case 5://-----End service cmd-----
             //do nothing
