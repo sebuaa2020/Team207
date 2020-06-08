@@ -221,6 +221,8 @@ void *state_control(void *arg) {
                 tb.clear_buff();
                 close (cfd);
                 state = STATE_WAIT;
+		//system("cd ~/demo_ws/src/wpb_home/wpb_home_tutorials/maps");
+		system("rosrun map_server map_saver -f ~/catkin_ws/src/wpb_home/wpb_home_tutorials/maps/map");//这里的保存路径可能要根据本地的工作路径进行手动修改
             break;
 
         }
